@@ -3,7 +3,7 @@
 public class NotFoundException : Exception
 {
     public NotFoundException(
-        string? message = null,
+        string message = "",
         Exception? innerException = null)
         : base(message, innerException)
     {

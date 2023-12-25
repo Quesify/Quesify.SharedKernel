@@ -3,7 +3,7 @@
 public class ForbiddenAccessException : Exception
 {
     public ForbiddenAccessException(
-        string? message = null,
+        string message = "",
         Exception? innerException = null)
         : base(message, innerException)
     {

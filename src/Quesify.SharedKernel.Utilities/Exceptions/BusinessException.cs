@@ -5,7 +5,7 @@ public class BusinessException : Exception
     public object? Errors { get; set; }
 
     public BusinessException(
-        string? message = null,
+        string message = "",
         Exception? innerException = null,
         object? errors = null)
         : base(message, innerException)
