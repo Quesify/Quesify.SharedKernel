@@ -29,7 +29,7 @@ public class CustomExceptionHandler : IExceptionHandler
                 await httpContext.Response.WriteNotFoundProblemDetailsAsJsonAsync(exceptionMessage ?? ErrorMessages.NotFoundErrorMessage);
                 break;
             case BusinessException businessException:
-                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                httpContext.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
                 await httpContext.Response.WriteBusinessProblemDetailsAsJsonAsync(exceptionMessage ?? ErrorMessages.BusinessErrorMessage, businessException.Errors);
                 break;
             default:
