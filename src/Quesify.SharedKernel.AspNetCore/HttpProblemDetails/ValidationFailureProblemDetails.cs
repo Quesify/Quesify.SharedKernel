@@ -12,6 +12,6 @@ public class ValidationFailureProblemDetails : ProblemDetails
         Status = StatusCodes.Status400BadRequest;
         Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1";
         Instance = instance;
-        Extensions.Add("Errors", errors);
+        Extensions.Add("errors", errors);
     }
 }
