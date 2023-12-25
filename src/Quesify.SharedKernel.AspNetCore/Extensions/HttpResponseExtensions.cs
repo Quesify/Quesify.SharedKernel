@@ -41,6 +41,12 @@ public static class HttpResponseExtensions
         await WriteProblemDetailsAsJsonAsync(httpResponse, problemDetails);
     }
 
+    public async static Task WriteConflictProblemDetailsAsJsonAsync(this HttpResponse httpResponse, string? detail)
+    {
+        var problemDetails = new ConflictProblemDetails(detail, httpResponse.HttpContext.Request.Path);
+        await WriteProblemDetailsAsJsonAsync(httpResponse, problemDetails);
+    }
+
     public async static Task WriteBusinessProblemDetailsAsJsonAsync(this HttpResponse httpResponse, string? detail, object? errors)
     {
         var problemDetails = new BusinessProblemDetails(detail, httpResponse.HttpContext.Request.Path, errors);
