@@ -1,32 +1,52 @@
-﻿namespace Quesify.SharedKernel.Guids;
+﻿using System.Runtime.InteropServices;
+
+namespace Quesify.SharedKernel.Guids;
 
 public class SequentialGuidGenerator : IGuidGenerator
 {
-    private static readonly long _baseDateTicks = new DateTime(1900, 1, 1).Ticks;
+    private class NativeMethods
+    {
+        [DllImport("rpcrt4.dll", SetLastError = true)]
+        public static extern int UuidCreateSequential(out Guid guid);
+    }
 
     public Guid Generate()
     {
-        byte[] guidArray = Guid.NewGuid().ToByteArray();
+        //Code is released into the public domain; no attribution required
+        const int RPC_S_OK = 0;
 
-        DateTime now = DateTime.UtcNow;
+        Guid guid;
+        int result = NativeMethods.UuidCreateSequential(out guid);
+        if (result != RPC_S_OK)
+            return Guid.NewGuid();
 
-        // Get the days and milliseconds which will be used to build the byte string 
-        TimeSpan days = new TimeSpan(now.Ticks - _baseDateTicks);
-        TimeSpan msecs = now.TimeOfDay;
+        //Endian swap the UInt32, UInt16, and UInt16 into the big-endian order (RFC specified order) that SQL Server expects
+        //See https://stackoverflow.com/a/47682820/12597
+        //Short version: UuidCreateSequential writes out three numbers in litte, rather than big, endian order
+        var s = guid.ToByteArray();
+        var t = new byte[16];
 
-        // Convert to a byte array 
-        // Note that SQL Server is accurate to 1/300th of a millisecond so we divide by 3.333333 
-        byte[] daysArray = BitConverter.GetBytes(days.Days);
-        byte[] msecsArray = BitConverter.GetBytes((long)(msecs.TotalMilliseconds / 3.333333));
+        //Endian swap UInt32
+        t[3] = s[0];
+        t[2] = s[1];
+        t[1] = s[2];
+        t[0] = s[3];
+        //Endian swap UInt16
+        t[5] = s[4];
+        t[4] = s[5];
+        //Endian swap UInt16
+        t[7] = s[6];
+        t[6] = s[7];
+        //The rest are already in the proper order
+        t[8] = s[8];
+        t[9] = s[9];
+        t[10] = s[10];
+        t[11] = s[11];
+        t[12] = s[12];
+        t[13] = s[13];
+        t[14] = s[14];
+        t[15] = s[15];
 
-        // Reverse the bytes to match SQL Servers ordering 
-        Array.Reverse(daysArray);
-        Array.Reverse(msecsArray);
-
-        // Copy the bytes into the guid 
-        Array.Copy(daysArray, daysArray.Length - 2, guidArray, guidArray.Length - 6, 2);
-        Array.Copy(msecsArray, msecsArray.Length - 4, guidArray, guidArray.Length - 4, 4);
-
-        return new Guid(guidArray);
+        return new Guid(t);
     }
 }
