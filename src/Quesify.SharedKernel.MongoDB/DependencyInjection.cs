@@ -7,10 +7,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddMongoDB<TDbContext>(
         this IServiceCollection services,
-        Action<MongoDbOptions<TDbContext>> configureMongoDbOptions)
+        Action<MongoDbOptions> configureMongoDbOptions)
         where TDbContext : MongoDbContext
     {
-        MongoDbOptions<TDbContext> mongoDbOptions = new MongoDbOptions<TDbContext>();
+        MongoDbOptions mongoDbOptions = new MongoDbOptions();
         configureMongoDbOptions(mongoDbOptions);
 
         return services
