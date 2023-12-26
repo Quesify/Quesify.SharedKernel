@@ -4,14 +4,13 @@ using Quesify.EventBus.Events;
 using Quesify.SharedKernel.EventBus.Abstractions;
 using Quesify.SharedKernel.EventBus.Events;
 using System.Text.RegularExpressions;
+using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace Quesify.SharedKernel.EventBus.Kafka;
 
 public class KafkaEventBus : EventBusBase
 {
     private readonly KafkaOptions _kafkaOptions;
-    private readonly IProducer<Null, byte[]> _producer;
-    private readonly IConsumer<Null, byte[]> _consumer;
     private readonly IAdminClient _adminClient;
     private readonly IKafkaSerilazer _kafkaSerilazer;
     private readonly ILogger<KafkaEventBus> _logger;
@@ -26,8 +25,6 @@ public class KafkaEventBus : EventBusBase
         : base(eventBusSubscriptionsManager, serviceProvider, eventBusOptions)
     {
         _kafkaOptions = kafkaOptions;
-        _producer = new ProducerBuilder<Null, byte[]>(_kafkaOptions.ProducerConfig).Build();
-        _consumer = new ConsumerBuilder<Null, byte[]>(_kafkaOptions.ConsumerConfig).Build();
         _adminClient = new AdminClientBuilder(_kafkaOptions.AdminClientConfig).Build();
         _kafkaSerilazer = kafkaSerilazer;
         _logger = logger;
@@ -40,7 +37,8 @@ public class KafkaEventBus : EventBusBase
         var body = _kafkaSerilazer.Serilaze(integrationEvent);
         var message = new Message<Null, byte[]> { Value = body };
         _logger.LogTrace("Publishing event to Kafka: {EventId}", integrationEvent.Id);
-        await _producer.ProduceAsync(topicName, message);
+        var producer = new ProducerBuilder<Null, byte[]>(_kafkaOptions.ProducerConfig).Build();
+        await producer.ProduceAsync(topicName, message);
     }
 
     public override async Task SubscribeAsync<T, TH>()
@@ -69,15 +67,17 @@ public class KafkaEventBus : EventBusBase
                 _logger.LogTrace("There is not topic for event {EventName}", eventName);
                 await Task.Delay(1000 * 60);
             }
+            
+            var consumer = new ConsumerBuilder<Null, byte[]>(_kafkaOptions.ConsumerConfig).Build();
 
-            _consumer.Subscribe(ProcessEventNamePattern(eventName));
+            consumer.Subscribe(ProcessEventNamePattern(eventName));
             _logger.LogTrace("Starting Kafka consume for event {EventName}", eventName);
 
             while (true)
             {
                 try
                 {
-                    var consumeResult = _consumer.Consume();
+                    var consumeResult = consumer.Consume();
                     if (consumeResult.IsPartitionEOF)
                     {
                         continue;
