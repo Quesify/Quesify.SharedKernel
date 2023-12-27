@@ -2,21 +2,21 @@
 
 public class PaginateList : IPaginateList
 {
-    public int Page { get; }
+    public int Page { get; set; }
 
-    public int Size { get; }
+    public int Size { get; set; }
     
-    public int TotalPages { get; }
+    public int TotalPages { get; set; }
     
-    public int TotalCount { get; }
+    public int TotalCount { get; set; }
     
-    public bool HasPreviousPage { get; }
+    public bool HasPreviousPage { get; set; }
     
-    public bool HasNextPage { get; }
+    public bool HasNextPage { get; set; }
     
-    public bool IsFirstPage { get; }
+    public bool IsFirstPage { get; set; }
     
-    public bool IsLastPage { get; }
+    public bool IsLastPage { get; set; }
 
     public PaginateList(
         int page,
@@ -36,7 +36,7 @@ public class PaginateList : IPaginateList
 
 public class PaginateList<T> : PaginateList, IPaginateList<T>
 {
-    public IReadOnlyCollection<T> Items { get; }
+    public IReadOnlyCollection<T> Items { get; set; }
 
     public PaginateList(
         IReadOnlyCollection<T> items,

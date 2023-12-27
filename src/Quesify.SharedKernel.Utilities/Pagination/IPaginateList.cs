@@ -2,24 +2,24 @@
 
 public interface IPaginateList
 {
-    int Page { get; }
+    int Page { get; set; }
 
-    int Size { get; }
+    int Size { get; set; }
     
-    int TotalPages { get; }
+    int TotalPages { get; set; }
     
-    int TotalCount { get; }
+    int TotalCount { get; set; }
     
-    bool HasPreviousPage { get; }
+    bool HasPreviousPage { get; set; }
     
-    bool HasNextPage { get; }
+    bool HasNextPage { get; set; }
     
-    bool IsFirstPage { get; }
+    bool IsFirstPage { get; set; }
     
-    bool IsLastPage { get; }
+    bool IsLastPage { get; set; }
 }
 
 public interface IPaginateList<T> : IPaginateList
 {
-    IReadOnlyCollection<T> Items { get; }
+    IReadOnlyCollection<T> Items { get; set; }
 }
